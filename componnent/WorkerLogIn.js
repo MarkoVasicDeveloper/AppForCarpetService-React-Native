@@ -3,71 +3,43 @@ import { View, Text, Button, ImageBackground, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import TextInputCustom from "../shared/TextInputCustom";
 import { useState } from "react";
-import api, { saveRefreshToken, saveToken } from "../api/api";
+import api from "../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/FontAwesome5";
 
-export default function LogIn({ navigation }) {
-  const [email, setEmail] = useState("");
+export default function WorkerLogIn({ navigation }) {
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [pay, setPay] = useState(false);
   const [message, setMessage] = useState(false);
 
-  function sendData() {
+  async function sendSubmit() {
+    if ((await AsyncStorage.getItem("@api_tokenuser")) === null)
+      return navigation.navigate("LOG IN");
     api(
-      "auth/user",
+      "api/worker/findWorker/" + (await AsyncStorage.getItem("@user")),
       "post",
       {
-        email: email,
+        name: name,
         password: password,
       },
       "user"
     )
       .then(async (res) => {
-        if (res.data.token !== undefined) {
-          await saveToken("user", res.data.token);
-          await saveRefreshToken("user", res.data.refreshToken);
-          try {
-            await AsyncStorage.setItem("@user", JSON.stringify(res.data.Id));
-          } catch (error) {
-            console.log(error);
-          }
-          api("api/subscriber/" + res.data.Id, "get", {}, "user")
-            .then(async (res) => {
-              if (
-                res.data.length !== 0 &&
-                res.data[0].expireAt > new Date().toISOString().split("T")[0]
-              ) {
-                navigation.navigate("WorkerLogIn");
-              } else if (res.data.length === 0) {
-                var date = new Date(); // Now
-                date.setDate(date.getDate() + 15);
-
-                api(
-                  "api/subscriber/add",
-                  "post",
-                  {
-                    userId: await AsyncStorage.getItem("@user"),
-                    timeAt: new Date().toISOString().split("T")[0],
-                    expireAt: date.toISOString().split("T")[0],
-                    price: 0,
-                  },
-                  "user"
-                )
-                  .then(() => {
-                    navigation.navigate("WorkerLogIn");
-                  })
-                  .catch((error) => console.log(error));
-              } else {
-                setPay(true);
-              }
-            })
-            .catch((error) => console.log(error));
+        if (res.data.statusCode !== -5002 && res.data.statusCode !== -5003) {
+          await AsyncStorage.setItem(
+            "@workerName",
+            JSON.stringify(res.data.name)
+          );
+          await AsyncStorage.setItem(
+            "@workerId",
+            JSON.stringify(res.data.workerId)
+          );
+          navigation.navigate("ReceptionCarpet");
         } else {
           setMessage(true);
         }
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error.data));
   }
 
   return (
@@ -77,16 +49,15 @@ export default function LogIn({ navigation }) {
     >
       <View style={styles.backgrgoundView}>
         <View>
-          <Text style={styles.title}>LOG IN</Text>
+          <Text style={styles.title}>WORKER LOG IN</Text>
         </View>
         <TextInputCustom
-          text="Email:"
-          changeText={setEmail}
-          value={email}
-          name="mail-bulk"
+          text="Ime:"
+          changeText={setName}
+          value={name}
+          name="signature"
           size={30}
           color="#fec400"
-          keyboard="email-address"
         />
         <TextInputCustom
           text="Lozinka:"
@@ -102,29 +73,26 @@ export default function LogIn({ navigation }) {
             color={"#fec400"}
             title="Posalji"
             onPress={() => {
-              sendData();
+              sendSubmit();
             }}
           />
         </View>
         <View style={styles.textBottom}>
           <Text style={{ color: "#fff", fontSize: 18 }}>Nemate nalog? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("SING UP")}>
+          <TouchableOpacity onPress={() => navigation.navigate("WorkerSingUp")}>
             <Text style={{ color: "#fec400", fontSize: 26 }}>Sing Up</Text>
           </TouchableOpacity>
         </View>
-        <View
-          style={message === true || pay === true ? styles.show : styles.hidden}
-        >
+        <View style={message === true ? styles.show : styles.hidden}>
           <TouchableOpacity
             onPress={() => {
-              setPay(false), setMessage(false);
+              setMessage(false);
             }}
           >
             <Icon size={20} name="window-close" color={"#fec400"} />
           </TouchableOpacity>
           <Text style={styles.messageError}>
             {message === true ? "Email adresa ili lozinka nisu tacni!" : ""}
-            {pay === true ? "Vasa pretplata je istekla!" : ""}
           </Text>
         </View>
       </View>
