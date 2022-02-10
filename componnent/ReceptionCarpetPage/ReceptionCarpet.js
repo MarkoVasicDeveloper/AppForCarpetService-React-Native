@@ -3,14 +3,14 @@ import {
   Button,
   ImageBackground,
   ScrollView,
-  StyleSheet,
   Text,
   View,
   Modal,
 } from "react-native";
-import TextInputCustom from "../shared/TextInputCustom";
+import TextInputCustom from "../../shared/TextInputCustom";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "../api/api";
+import api from "../../api/api";
+import styles from "./ReceptionCarpetStyles";
 
 const ReceptionCarpet = ({ navigation }) => {
   const [name, setName] = useState("");
@@ -135,88 +135,54 @@ const ReceptionCarpet = ({ navigation }) => {
             userId: await AsyncStorage.getItem("@userId"),
           },
           "user"
-        ).then(async (res) => {
-          const receptions = res.data.carpetReceptions;
-          setSavedNumberOfCarpet(
-            receptions[receptions.length - 1].numberOfCarpet
-          );
-          setSavedNumberOfTracks(
-            receptions[receptions.length - 1].numberOfTracks
-          );
-          setSavedNote(receptions[receptions.length - 1].note);
-          setCarpetReceptionId(await AsyncStorage.getItem("@reception_user"));
+        )
+          .then(async (res) => {
+            const receptions = res.data.carpetReceptions;
+            setCarpetReceptionId(await AsyncStorage.getItem("@reception_user"));
 
-          api(
-            "api/carpetReception/getAllReceptionsByClient/" +
-              receptions[receptions.length - 1].clientsId +
-              "/" +
-              (await AsyncStorage.getItem("@userId")),
-            "post",
+            receptions
+              .slice(Math.max(res.data.length - 4, 0))
+              .reverse()
+              .forEach((item, index) => {
+                if (index === 0) {
+                  setSavedNumberOfCarpet(item.numberOfCarpet);
+                  setSavedNumberOfTracks(item.numberOfTracks);
+                }
+                if (index === 1) {
+                  setLastVisitDate(item.timeAt.split("T")[0]);
+                  setLastVisitNumberOfCarpet(item.numberOfCarpet);
+                  setLastVisitNumberOfTracks(item.numberOfTracks);
+                }
+                if (index === 2) {
+                  setPenultimateVisitDate(item.timeAt.split("T")[0]);
+                  setPenultimateVisitNumberOfCarpet(item.numberOfCarpet);
+                  setPenultimateVisitNumberOfTracks(item.numberOfTracks);
+                }
+                if (index === 3) {
+                  setThirdVisitDate(item.timeAt.split("T")[0]);
+                  setThirdVisitNumberOfCarpet(item.numberOfCarpet);
+                  setThirdVisitNumberOfTracks(item.numberOfTracks);
+                }
+              });
 
-            {},
-            "user"
-          )
-            .then(async (res) => {
-              setLastVisitNumberOfCarpet("");
-              setLastVisitNumberOfTracks("");
-              setPenultimateVisitNumberOfCarpet("");
-              setPenultimateVisitNumberOfTracks("");
-              setThirdVisitNumberOfCarpet("");
-              setThirdVisitNumberOfTracks("");
-
-              const data = res.data;
-
-              if (data[data.length - 2]) {
-                setLastVisitDate(data[data.length - 2].timeAt.split("T")[0]);
-                setLastVisitNumberOfCarpet(
-                  data[data.length - 2].numberOfCarpet
-                );
-                setLastVisitNumberOfTracks(
-                  data[data.length - 2].numberOfTracks
-                );
-              }
-
-              if (data[data.length - 3]) {
-                setPenultimateVisitDate(
-                  data[data.length - 3].timeAt.split("T")[0]
-                );
-                setPenultimateVisitNumberOfCarpet(
-                  data[data.length - 3].numberOfCarpet
-                );
-                setPenultimateVisitNumberOfTracks(
-                  data[data.length - 3].numberOfTracks
-                );
-              }
-
-              if (data[data.length - 4]) {
-                setThirdVisitDate(data[data.length - 4].timeAt.split("T")[0]);
-                setThirdVisitNumberOfCarpet(
-                  data[data.length - 4].numberOfCarpet
-                );
-                setThirdVisitNumberOfTracks(
-                  data[data.length - 4].numberOfTracks
-                );
-              }
-
-              setName("");
-              setSurname("");
-              setAddress("");
-              setPhone("");
-              setNumberOfCarpet("");
-              setNumberOfTracks("");
-              setNote("");
-              const receptionId = Number(
-                await AsyncStorage.getItem("@reception_user")
-              );
-              await AsyncStorage.setItem(
-                "@reception_user",
-                JSON.stringify(receptionId + 1)
-              );
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        });
+            setName("");
+            setSurname("");
+            setAddress("");
+            setPhone("");
+            setNumberOfCarpet("");
+            setNumberOfTracks("");
+            setNote("");
+            const receptionId = Number(
+              await AsyncStorage.getItem("@reception_user")
+            );
+            await AsyncStorage.setItem(
+              "@reception_user",
+              JSON.stringify(receptionId + 1)
+            );
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       })
       .catch((error) => {
         console.log(error);
@@ -287,7 +253,7 @@ const ReceptionCarpet = ({ navigation }) => {
   return (
     <ImageBackground
       style={styles.background}
-      source={require("../assets/hero-bg.jpg")}
+      source={require("../../assets/hero-bg.jpg")}
     >
       <View style={styles.darkTheme}>
         <View style={styles.header}>
@@ -426,49 +392,11 @@ const ReceptionCarpet = ({ navigation }) => {
             </View>
 
             <View>
-              <Text
-                style={{
-                  color: "#ccc",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                }}
-              >
-                Ime: {savedName}
-              </Text>
-              <Text
-                style={{
-                  color: "#ccc",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                }}
-              >
-                Prezime:{savedSurname}
-              </Text>
-              <Text
-                style={{
-                  color: "#ccc",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                }}
-              >
-                Adresa:{savedAddress}
-              </Text>
-              <Text
-                style={{
-                  color: "#ccc",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                }}
-              >
-                Telefon:{savedPhone}
-              </Text>
-              <Text
-                style={{
-                  color: "#ccc",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                }}
-              >
+              <Text style={styles.IDtekst}>Ime: {savedName}</Text>
+              <Text style={styles.IDtekst}>Prezime:{savedSurname}</Text>
+              <Text style={styles.IDtekst}>Adresa:{savedAddress}</Text>
+              <Text style={styles.IDtekst}>Telefon:{savedPhone}</Text>
+              <Text style={styles.IDtekst}>
                 Broj tepiha:{savedNumberOfCarpet}
               </Text>
               <Text
@@ -539,7 +467,7 @@ const ReceptionCarpet = ({ navigation }) => {
         <Modal visible={display} animationType="slide">
           <ImageBackground
             style={styles.background}
-            source={require("../assets/hero-bg.jpg")}
+            source={require("../../assets/hero-bg.jpg")}
           >
             <ScrollView>
               <View style={styles.container}>
@@ -651,63 +579,3 @@ const ReceptionCarpet = ({ navigation }) => {
 };
 
 export default ReceptionCarpet;
-
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
-  darkTheme: {
-    backgroundColor: "#00000099",
-    flex: 1,
-    paddingTop: "20%",
-  },
-  header: {
-    width: "100%",
-    height: "10%",
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    borderBottomColor: "#ccc",
-    borderBottomWidth: 2,
-  },
-  text: {
-    fontSize: 20,
-    color: "#f5f5f5",
-  },
-  textDinamic: {
-    fontSize: 25,
-    color: "#ffff",
-    fontWeight: "bold",
-  },
-  clientHolder: {
-    alignItems: "center",
-  },
-  container: {
-    padding: 10,
-    margin: 10,
-    borderColor: "#793ea5",
-    borderWidth: 2,
-    borderRadius: 20,
-    backgroundColor: "#000000cc",
-  },
-  containerSavedData: {
-    padding: 20,
-    margin: 10,
-    borderColor: "#fec400",
-    borderWidth: 2,
-    borderRadius: 20,
-  },
-  visitContainer: {
-    borderColor: "#aaa",
-    borderWidth: 2,
-    marginTop: 10,
-    padding: 5,
-  },
-  visitInfo: {
-    borderColor: "#fec400",
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    paddingBottom: 10,
-    marginBottom: 10,
-  },
-});

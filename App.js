@@ -4,7 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import LogIn from "./componnent/LogIn";
 import SingUp from "./componnent/SingUp";
-import ReceptionCarpet from "./componnent/ReceptionCarpet";
+import ReceptionCarpet from "./componnent/ReceptionCarpetPage/ReceptionCarpet";
 import WorkerLogIn from "./componnent/WorkerLogIn";
 import WorkerSingUp from "./componnent/WorkerSingUp";
 
