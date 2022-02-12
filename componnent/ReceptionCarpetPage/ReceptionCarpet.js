@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Button,
   ImageBackground,
@@ -11,8 +11,11 @@ import TextInputCustom from "../../shared/TextInputCustom";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../api/api";
 import styles from "./ReceptionCarpetStyles";
+import { UserContext } from "../../shared/UserContext";
 
 const ReceptionCarpet = ({ navigation }) => {
+  const { user, setUser } = useContext(UserContext);
+
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [address, setAddress] = useState("");
@@ -46,7 +49,6 @@ const ReceptionCarpet = ({ navigation }) => {
   const [thirdVisitNumberOfCarpet, setThirdVisitNumberOfCarpet] = useState("");
   const [thirdVisitNumberOfTracks, setThirdVisitNumberOfTracks] = useState("");
 
-  const [userName, setUserName] = useState("");
   const [display, setDisplay] = useState(false);
 
   const [editName, setEditName] = useState("");
@@ -57,28 +59,13 @@ const ReceptionCarpet = ({ navigation }) => {
   const [editNumberOfTracks, setEditNumberOfTracks] = useState("");
   const [editNote, setEditNote] = useState("");
 
-  const [workerName, setWorkerName] = useState("");
-
   useEffect(async () => {
     if ((await AsyncStorage.getItem("@api_tokenuser")) === null)
       return navigation.navigate("LOG IN");
-    if ((await AsyncStorage.getItem("@workerId")) === null)
-      return navigation.navigate("WorkerLogIn");
-    setWorkerName(JSON.parse(await AsyncStorage.getItem("@workerName")));
+    if (user.workerId === null) return navigation.navigate("WorkerLogIn");
+
     api(
-      "api/user/getUserById/" + (await AsyncStorage.getItem("@user")),
-      "post",
-      {},
-      "user"
-    )
-      .then(async (res) => {
-        setUserName(res.data.name);
-        await AsyncStorage.setItem("@userId", JSON.stringify(res.data.userId));
-      })
-      .catch((error) => console.log(error));
-    api(
-      "api/carpetReception/getBigistReceptionByUser/" +
-        (await AsyncStorage.getItem("@userId")),
+      "api/carpetReception/getBigistReceptionByUser/" + user.userId,
       "post",
       {},
       "user"
@@ -103,7 +90,7 @@ const ReceptionCarpet = ({ navigation }) => {
       return;
     }
     await api(
-      "api/clients/addClient/" + (await AsyncStorage.getItem("@userId")),
+      `api/clients/addClient/${user.userId}`,
       "post",
 
       {
@@ -120,8 +107,7 @@ const ReceptionCarpet = ({ navigation }) => {
         setSavedaddress(res.data.address);
         setSavedphone(res.data.phone);
         await api(
-          "api/carpetReception/addReception/" +
-            (await AsyncStorage.getItem("@workerId")),
+          `api/carpetReception/addReception/${user.workerId}`,
           "post",
 
           {
@@ -132,7 +118,7 @@ const ReceptionCarpet = ({ navigation }) => {
             carpet_reception_user: await AsyncStorage.getItem(
               "@reception_user"
             ),
-            userId: await AsyncStorage.getItem("@userId"),
+            userId: user.userId,
           },
           "user"
         )
@@ -191,8 +177,7 @@ const ReceptionCarpet = ({ navigation }) => {
 
   async function sendEditData() {
     api(
-      "api/clients/getClientByNameSurnameAddress/" +
-        (await AsyncStorage.getItem("@userId")),
+      `api/clients/getClientByNameSurnameAddress/${user.userId}`,
       "post",
       {
         name: savedName,
@@ -202,9 +187,8 @@ const ReceptionCarpet = ({ navigation }) => {
       "user"
     )
       .then((res) => {
-        const clientId = res.data.clientsId;
         api(
-          "api/clients/editClient/" + clientId,
+          `api/clients/editClient/${res.data.clientsId}`,
           "post",
           {
             name: editName,
@@ -214,16 +198,13 @@ const ReceptionCarpet = ({ navigation }) => {
           },
           "user"
         )
-          .then(async (res) => {
+          .then((res) => {
             setSavedname(res.data.name);
             setSavedsurname(res.data.surname);
             setSavedaddress(res.data.address);
             setSavedphone(res.data.phone);
             api(
-              "api/carpetReception/editReception/" +
-                (await AsyncStorage.getItem("@workerId")) +
-                "/" +
-                (await AsyncStorage.getItem("@user")),
+              `api/carpetReception/editReception/${user.workerId}/${user.userId}`,
               "post",
               {
                 carpetReceptionId: carpetReception,
@@ -244,10 +225,13 @@ const ReceptionCarpet = ({ navigation }) => {
       .catch((error) => console.log(error.data));
   }
 
-  async function logOutWorker() {
-    await AsyncStorage.setItem("@workerId", "0");
-    await AsyncStorage.setItem("@workerName", "");
-    navigation.navigate("WorkerLogIn");
+  function logOutWorker() {
+    setUser({
+      ...user,
+      workerId: null,
+      workerName: "",
+      workerLogIn: false,
+    });
   }
 
   return (
@@ -259,11 +243,11 @@ const ReceptionCarpet = ({ navigation }) => {
         <View style={styles.header}>
           <View style={styles.text}>
             <Text style={styles.text}>Korisnik: </Text>
-            <Text style={styles.textDinamic}>{userName}</Text>
+            <Text style={styles.textDinamic}>{user.userName}</Text>
           </View>
           <View>
             <Text style={styles.text}>Radnik: </Text>
-            <Text style={styles.textDinamic}>{workerName} </Text>
+            <Text style={styles.textDinamic}>{user.workerName} </Text>
           </View>
           <View>
             <Button

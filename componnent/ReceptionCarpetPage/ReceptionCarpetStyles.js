@@ -7,16 +7,17 @@ export default StyleSheet.create({
   darkTheme: {
     backgroundColor: "#00000099",
     flex: 1,
-    paddingTop: "20%",
+    paddingTop: "5%",
   },
   header: {
     width: "100%",
-    height: "10%",
+    height: 70,
     flexDirection: "row",
     justifyContent: "space-evenly",
     alignItems: "center",
     borderBottomColor: "#ccc",
     borderBottomWidth: 2,
+    marginBottom: 10,
   },
   text: {
     fontSize: 20,

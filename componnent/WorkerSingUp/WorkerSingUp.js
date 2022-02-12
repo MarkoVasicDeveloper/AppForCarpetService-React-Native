@@ -1,16 +1,19 @@
-import React, { useState } from "react";
-import { View, Text, Button, StyleSheet, ImageBackground } from "react-native";
+import React, { useContext, useState } from "react";
+import { View, Text, Button, ImageBackground } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/FontAwesome5";
-import TextInputCustom from "../shared/TextInputCustom";
-import api from "../api/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import TextInputCustom from "../../shared/TextInputCustom";
+import api from "../../api/api";
+import { UserContext } from "../../shared/UserContext";
+import style from "./WorkerSingUpPage";
 
 const WorkerSingUp = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [message, setMessage] = useState(false);
   const [required, setRequired] = useState(false);
+
+  const { user, _ } = useContext(UserContext);
 
   async function sendSubmit() {
     if (name === "" || password === "") {
@@ -19,7 +22,7 @@ const WorkerSingUp = ({ navigation }) => {
       return;
     }
     api(
-      "api/worker/addWorker/" + (await AsyncStorage.getItem("@user")),
+      `api/worker/addWorker/${user.userId}`,
       "post",
       {
         password: password,
@@ -37,7 +40,7 @@ const WorkerSingUp = ({ navigation }) => {
   return (
     <ImageBackground
       style={style.background}
-      source={require("../assets/hero-bg.jpg")}
+      source={require("../../assets/hero-bg.jpg")}
     >
       <View style={style.backgroundView}>
         <View>
@@ -93,46 +96,5 @@ const WorkerSingUp = ({ navigation }) => {
     </ImageBackground>
   );
 };
-
-const style = StyleSheet.create({
-  text: {
-    fontSize: 20,
-    color: "#fec400",
-    textAlign: "center",
-  },
-  showMessage: {
-    position: "absolute",
-    top: 200,
-    borderWidth: 1,
-    borderColor: "#fec400",
-    borderRadius: 20,
-    width: "90%",
-    height: 100,
-    backgroundColor: "#000000dd",
-    padding: 5,
-  },
-  hidden: {
-    display: "none",
-  },
-  buttonView: {
-    margin: 10,
-  },
-  scroll: {
-    width: "100%",
-  },
-  background: {
-    flex: 1,
-  },
-  backgroundView: {
-    flex: 1,
-    backgroundColor: "#00000099",
-    paddingTop: 80,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 42,
-    color: "#fec400",
-  },
-});
 
 export default WorkerSingUp;

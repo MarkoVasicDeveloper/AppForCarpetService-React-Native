@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { View, Text, Button, StyleSheet, ImageBackground } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/FontAwesome5";
-import TextInputCustom from "../shared/TextInputCustom";
-import api from "../api/api";
+import TextInputCustom from "../../shared/TextInputCustom";
+import api from "../../api/api";
+import style from "./SingUpStyle";
 
 const SingUp = ({ navigation }) => {
   const [name, setName] = useState("");
@@ -42,10 +43,10 @@ const SingUp = ({ navigation }) => {
       .then((res) => {
         if (res.data.statusCode === -10001) {
           setMessage(true);
-        } else {
-          setMessage(false);
-          navigation.navigate("LOG IN");
+          return;
         }
+        setMessage(false);
+        navigation.navigate("LOG IN");
       })
       .catch((error) => console.log(error));
   }
@@ -53,7 +54,7 @@ const SingUp = ({ navigation }) => {
   return (
     <ImageBackground
       style={style.background}
-      source={require("../assets/hero-bg.jpg")}
+      source={require("../../assets/hero-bg.jpg")}
     >
       <View style={style.backgroundView}>
         <View>
@@ -167,46 +168,5 @@ const SingUp = ({ navigation }) => {
     </ImageBackground>
   );
 };
-
-const style = StyleSheet.create({
-  text: {
-    fontSize: 20,
-    color: "#fec400",
-    textAlign: "center",
-  },
-  showMessage: {
-    position: "absolute",
-    top: 200,
-    borderWidth: 1,
-    borderColor: "#fec400",
-    borderRadius: 20,
-    width: "90%",
-    height: 100,
-    backgroundColor: "#000000dd",
-    padding: 5,
-  },
-  hidden: {
-    display: "none",
-  },
-  buttonView: {
-    margin: 10,
-  },
-  scroll: {
-    width: "100%",
-  },
-  background: {
-    flex: 1,
-  },
-  backgroundView: {
-    flex: 1,
-    backgroundColor: "#00000099",
-    paddingTop: 80,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 42,
-    color: "#fec400",
-  },
-});
 
 export default SingUp;

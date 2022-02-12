@@ -1,68 +1,97 @@
 import "react-native-gesture-handler";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import LogIn from "./componnent/LogIn";
-import SingUp from "./componnent/SingUp";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import LogIn from "./componnent/LogInPage/LogIn";
+import SingUp from "./componnent/SingUpPage/SingUp";
 import ReceptionCarpet from "./componnent/ReceptionCarpetPage/ReceptionCarpet";
-import WorkerLogIn from "./componnent/WorkerLogIn";
-import WorkerSingUp from "./componnent/WorkerSingUp";
+import WorkerLogIn from "./componnent/WorkerLogInPage/WorkerLogIn";
+import WorkerSingUp from "./componnent/WorkerSingUp/WorkerSingUp";
+import { UserContext } from "./shared/UserContext";
 
 const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
+
+export function DrawerNav() {
+  <NavigationContainer>
+    <Drawer.Navigator initialRouteName="ReceptionCarpet">
+      <Drawer.Screen name="ReceptionCarpet" component={ReceptionCarpet} />
+    </Drawer.Navigator>
+  </NavigationContainer>;
+}
 
 export default function App() {
+  const [user, setUser] = useState({
+    userId: 0,
+    userName: "",
+    workerLogIn: false,
+    workerId: null,
+    workerName: "",
+  });
+
+  const providerUser = useMemo(() => ({ user, setUser }), [user, setUser]);
+
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="LOG IN"
-          component={LogIn}
-          options={{
-            headerTransparent: true,
-            headerTintColor: "#fec400",
-            headerStyle: { height: 100 },
-            headerTitle: "",
-          }}
-        />
-        <Stack.Screen
-          name="SING UP"
-          component={SingUp}
-          options={{
-            headerTransparent: true,
-            headerTintColor: "#fec400",
-            headerStyle: { height: 100 },
-            headerTitle: "",
-          }}
-        />
-        <Stack.Screen
-          name="ReceptionCarpet"
-          component={ReceptionCarpet}
-          options={{
-            headerTransparent: true,
-            headerTintColor: "#fec400",
-            headerStyle: { height: 100 },
-          }}
-        />
-        <Stack.Screen
-          name="WorkerLogIn"
-          component={WorkerLogIn}
-          options={{
-            headerTransparent: true,
-            headerTintColor: "#fec400",
-            headerStyle: { height: 100 },
-          }}
-        />
+      <UserContext.Provider value={providerUser}>
+        {user.workerLogIn ? (
+          <Drawer.Navigator initialRouteName="LOG IN">
+            <Drawer.Screen name="ReceptionCarpet" component={ReceptionCarpet} />
+          </Drawer.Navigator>
+        ) : (
+          <Stack.Navigator>
+            <Stack.Screen
+              name="LOG IN"
+              component={LogIn}
+              options={{
+                headerTransparent: true,
+                headerTintColor: "#fec400",
+                headerStyle: { height: 100 },
+                headerTitle: "",
+              }}
+            />
+            <Stack.Screen
+              name="SING UP"
+              component={SingUp}
+              options={{
+                headerTransparent: true,
+                headerTintColor: "#fec400",
+                headerStyle: { height: 100 },
+                headerTitle: "",
+              }}
+            />
+            <Stack.Screen
+              name="ReceptionCarpet"
+              component={ReceptionCarpet}
+              options={{
+                headerTransparent: true,
+                headerTintColor: "#fec400",
+                headerStyle: { height: 100 },
+              }}
+            />
+            <Stack.Screen
+              name="WorkerLogIn"
+              component={WorkerLogIn}
+              options={{
+                headerTransparent: true,
+                headerTintColor: "#fec400",
+                headerStyle: { height: 100 },
+              }}
+            />
 
-        <Stack.Screen
-          name="WorkerSingUp"
-          component={WorkerSingUp}
-          options={{
-            headerTransparent: true,
-            headerTintColor: "#fec400",
-            headerStyle: { height: 100 },
-          }}
-        />
-      </Stack.Navigator>
+            <Stack.Screen
+              name="WorkerSingUp"
+              component={WorkerSingUp}
+              options={{
+                headerTransparent: true,
+                headerTintColor: "#fec400",
+                headerStyle: { height: 100 },
+              }}
+            />
+          </Stack.Navigator>
+        )}
+      </UserContext.Provider>
     </NavigationContainer>
   );
 }
