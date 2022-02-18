@@ -9,17 +9,10 @@ import ReceptionCarpet from "./componnent/ReceptionCarpetPage/ReceptionCarpet";
 import WorkerLogIn from "./componnent/WorkerLogInPage/WorkerLogIn";
 import WorkerSingUp from "./componnent/WorkerSingUp/WorkerSingUp";
 import { UserContext } from "./shared/UserContext";
+import MeasuringAndPreparingCarpet from "./componnent/MeasuringAndPreparingCarpet/MeasuringAndPreparingCarpet";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
-
-export function DrawerNav() {
-  <NavigationContainer>
-    <Drawer.Navigator initialRouteName="ReceptionCarpet">
-      <Drawer.Screen name="ReceptionCarpet" component={ReceptionCarpet} />
-    </Drawer.Navigator>
-  </NavigationContainer>;
-}
 
 export default function App() {
   const [user, setUser] = useState({
@@ -38,6 +31,10 @@ export default function App() {
         {user.workerLogIn ? (
           <Drawer.Navigator initialRouteName="LOG IN">
             <Drawer.Screen name="ReceptionCarpet" component={ReceptionCarpet} />
+            <Drawer.Screen
+              name="Measuring and preparing carpet"
+              component={MeasuringAndPreparingCarpet}
+            />
           </Drawer.Navigator>
         ) : (
           <Stack.Navigator>

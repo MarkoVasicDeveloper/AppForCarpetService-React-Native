@@ -65,7 +65,7 @@ const ReceptionCarpet = ({ navigation }) => {
     if (user.workerId === null) return navigation.navigate("WorkerLogIn");
 
     api(
-      "api/carpetReception/getBigistReceptionByUser/" + user.userId,
+      `api/carpetReception/getBigistReceptionByUser/${user.userId}`,
       "post",
       {},
       "user"
